@@ -17,7 +17,7 @@ dotenv.config({ path: "./config.env" });
 const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://vercel.com/johnsonayo/edugie-kitchen-admin-frontend",
+  "https://edugie-kitchen-admin-frontend.vercel.app/",
 ];
 const corsOptions = {
   origin: function (origin: any, callback: any) {
