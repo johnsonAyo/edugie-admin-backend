@@ -15,19 +15,12 @@ dotenv.config({ path: "./config.env" });
 
 // Start express app
 const app = express();
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://edugie-kitchen-admin-frontend.vercel.app/",
-];
 const corsOptions = {
-  origin: function (origin: any, callback: any) {
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "*",
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
 };
+app.use(cors(corsOptions));
 
 app.use(cors(corsOptions));
 
