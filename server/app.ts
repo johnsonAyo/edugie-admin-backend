@@ -16,7 +16,7 @@ dotenv.config({ path: "./config.env" });
 // Start express app
 const app = express();
 const corsOptions ={
-    origin:'http://localhost:3000', 
+    origin:'http://localhost:3000','https://edugie-kitchen-admin-frontend.vercel.app',
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
