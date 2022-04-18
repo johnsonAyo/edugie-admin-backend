@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import ErrorHandler from "./utils/appError";
 import globalErrorHandler from "./controllers/errorController";
 import mealRoutes from "./routes/mealRoutes";
+import ordersRoutes from "./routes/ordersRoutes";
 
 const dotenv = require("dotenv");
 
@@ -57,6 +58,7 @@ mongoose
 // 3) ROUTES
 
 app.use("/api/meal", mealRoutes);
+app.use("/api/orders", ordersRoutes);
 
 app.all("*", (req, res, next) => {
   next(
