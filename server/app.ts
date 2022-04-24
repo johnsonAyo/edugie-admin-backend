@@ -10,6 +10,7 @@ import nodemailer from "nodemailer";
 import globalErrorHandler from "./controllers/errorController";
 import mealRoutes from "./routes/mealRoutes";
 import ordersRoutes from "./routes/ordersRoutes";
+import smtpTransport from "nodemailer-smtp-transport";
 
 const dotenv = require("dotenv");
 
@@ -61,49 +62,47 @@ app.use("/api/orders", ordersRoutes);
 app.post("/send_mail", async (req, res) => {
   let { order } = req.body;
   let { formData, cartItems, totalAmount } = order;
-  const transport = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.EMAIL_PORT) || 0,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
-  });
-  await transport.sendMail({
-    from: process.env.MAIL_FROM,
-    to: "test@test.com",
-    subject: "Test Email",
-    html: `<div className = "email" styles="
-    border:1px solid black;
-    padding:20px;
-    font-size: 20px;
-    line-height: 2;
-    ">
-    <h2> ${formData.fullName}'s Order</h2>
-    <p>${formData.fullName} with the phone number  ${
-      formData.phone + " placed an order"
-    } </p>
-    <p>Customer is Located in suit ${
-      formData.suite
-    } and can be reached with the email  ${
-      formData.email
-    } the order is as folllow </p>
-    <p>${cartItems.map(
-      (item: any) =>
-        item.qty + " " + item.title + " at ₦" + item.price + " each...."
-    )} </p>
-    <p>The total cost for this order is ₦${totalAmount} </p>
+  let transporter = nodemailer.createTransport(
+    smtpTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      auth: {
+        user: "Johnsonafuye@gmail.com",
+        pass: "Jonsyn01.$",
+      },
+    })
+  );
+
+  var mailOptions = {
+    from: "johnsonafuye@gmail.com",
+    to: formData.email,
+    subject: `${formData.fullName} just placed an Order`,
+    text: `${formData.fullName} with the phone number ${formData.phone} placed an order
     
-  
-    <p> Waiting for the confirmation Call, ${formData.fullName} </p>
-    </div>`,
-  });
-  console.log("msg sent");
-  res.status(201).json({
-    status: "success",
-    data: {
-      data: order,
-    },
+   Customer is Located in suit ${formData.suite} 
+   this customer can be reached with the email ${formData.email} 
+   ${formData.fullName} ordered
+   ${cartItems.map(
+     (item: any) =>
+       item.qty + " " + item.title + " at ₦" + item.price + " each...."
+   )} 
+   The total cost for this order is ₦${totalAmount} 
+    
+   Waiting for the confirmation Call, ${formData.fullName}`,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+    res.status(201).json({
+      status: "success",
+      data: {
+        data: order,
+      },
+    });
   });
 });
 
