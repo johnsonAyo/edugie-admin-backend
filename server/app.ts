@@ -68,7 +68,7 @@ app.post("/send_mail", async (req, res) => {
       host: "smtp.gmail.com",
       auth: {
         user: "Johnsonafuye@gmail.com",
-        pass: "Jonsyn01.$",
+        pass: "MagicJohnson",
       },
     })
   );
@@ -77,11 +77,15 @@ app.post("/send_mail", async (req, res) => {
     from: "johnsonafuye@gmail.com",
     to: formData.email,
     subject: `${formData.fullName} just placed an Order`,
-    text: `${formData.fullName} with the phone number ${formData.phone} placed an order
+    text: `${formData.fullName} with the phone number ${
+      formData.phone
+    } placed an order
     
    Customer is Located in suit ${formData.suite} 
    this customer can be reached with the email ${formData.email} 
-   ${formData.fullName} ordered
+
+                  ${formData.fullName} ordered
+
    ${cartItems.map(
      (item: any) =>
        item.qty + " " + item.title + " at ₦" + item.price + " each...."
