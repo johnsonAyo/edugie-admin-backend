@@ -62,22 +62,20 @@ app.use("/api/orders", ordersRoutes);
 app.post("/send_mail", async (req, res) => {
   let { order } = req.body;
   let { formData, cartItems, totalAmount } = order;
-  let transporter = nodemailer.createTransport(
-    smtpTransport({
-      service: "gmail",
-      host: "smtp.gmail.com",
-      auth: {
-        user: "Johnsonafuye@gmail.com",
-        pass: "MagicJohnson",
-      },
-    })
-  );
+  let transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: Number(process.env.MAIL_PORT) || 0,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
+    },
+  });
 
-  var mailOptions = {
+  await transporter.sendMail({
     from: "johnsonafuye@gmail.com",
     to: formData.email,
     subject: `${formData.fullName} just placed an Order`,
-    text: `${formData.fullName} with the phone number ${
+    html: `${formData.fullName} with the phone number ${
       formData.phone
     } placed an order
     
@@ -93,20 +91,6 @@ app.post("/send_mail", async (req, res) => {
    The total cost for this order is ₦${totalAmount} 
     
    Waiting for the confirmation Call, ${formData.fullName}`,
-  };
-
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
-    }
-    res.status(201).json({
-      status: "success",
-      data: {
-        data: order,
-      },
-    });
   });
 });
 
