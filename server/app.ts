@@ -19,7 +19,7 @@ dotenv.config({ path: "./config.env" });
 // Start express app
 const app = express();
 const corsOptions = {
-  origin: "*",
+  origin: "https://edugie-kitchen.herokuapp.com",
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
