@@ -6,11 +6,12 @@ import mongoSanitize from "express-mongo-sanitize";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import ErrorHandler from "./utils/appError";
-import nodemailer from "nodemailer";
+const nodemailer = require("nodemailer");
 import globalErrorHandler from "./controllers/errorController";
 import mealRoutes from "./routes/mealRoutes";
 import ordersRoutes from "./routes/ordersRoutes";
-import smtpTransport from "nodemailer-smtp-transport";
+import { google, Auth } from "googleapis";
+import { gmail } from "googleapis/build/src/apis/gmail";
 
 const dotenv = require("dotenv");
 
@@ -18,11 +19,13 @@ dotenv.config({ path: "./config.env" });
 
 // Start express app
 const app = express();
+
 const corsOptions = {
   origin: "*",
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
+
 app.use(cors(corsOptions));
 
 // Set security HTTP headers
@@ -57,41 +60,79 @@ mongoose
 
 // 3) ROUTES
 
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+
+console.log(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN);
+
+const oauthClient: Auth.OAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+oauthClient.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
+
 app.use("/api/meal", mealRoutes);
 app.use("/api/orders", ordersRoutes);
 app.post("/send_mail", async (req, res) => {
-  let { order } = req.body;
-  let { formData, cartItems, totalAmount } = order;
-  let transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT) || 0,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
-  });
+  async function sendMail() {
+    try {
+      let { order } = req.body;
+      let { formData, cartItems, totalAmount } = order;
+      const accessToken = await oauthClient.getAccessToken();
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          type: "OAuth2",
+          user: process.env.EMAIL,
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+          refreshToken: REFRESH_TOKEN,
+          accessToken: accessToken,
+        },
+      });
+      const mailOptions = {
+        from: "Edugiehomes",
 
-  await transporter.sendMail({
-    from: "johnsonafuye@gmail.com",
-    to: formData.email,
-    subject: `${formData.fullName} just placed an Order`,
-    html: `${formData.fullName} with the phone number ${
-      formData.phone
-    } placed an order
-    
-   Customer is Located in suit ${formData.suite} 
-   this customer can be reached with the email ${formData.email} 
+        to: formData.email,
+        subject: `${formData.fullName} just placed an Order`,
+        text: "hello from gmail using api",
+        html: `<h1>${formData.fullName} placed an order</h1>
+        ${formData.fullName} with the phone number ${
+          formData.phone
+        } placed an order
+          
+             Customer is Located in suit ${formData.suite}
+             this customer can be reached with the email ${formData.email}
+          
+                            ${formData.fullName} ordered
+          
+             ${cartItems.map(
+               (item: any) =>
+                 item.qty +
+                 " " +
+                 item.title +
+                 " at ₦" +
+                 item.price +
+                 " each...."
+             )}
+             The total cost for this order is ₦${totalAmount}
+          
+             Waiting for the confirmation Call, ${formData.fullName}`,
+      };
 
-                  ${formData.fullName} ordered
+      const result = await transporter.sendMail(mailOptions);
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
 
-   ${cartItems.map(
-     (item: any) =>
-       item.qty + " " + item.title + " at ₦" + item.price + " each...."
-   )} 
-   The total cost for this order is ₦${totalAmount} 
-    
-   Waiting for the confirmation Call, ${formData.fullName}`,
-  });
+  sendMail()
+    .then((result) => console.log("email sent ....", result))
+    .catch((error) => console.log(error.message));
 });
 
 app.all("*", (req, res, next) => {
