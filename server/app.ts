@@ -11,7 +11,6 @@ import globalErrorHandler from "./controllers/errorController";
 import mealRoutes from "./routes/mealRoutes";
 import ordersRoutes from "./routes/ordersRoutes";
 import { google, Auth } from "googleapis";
-import { gmail } from "googleapis/build/src/apis/gmail";
 
 const dotenv = require("dotenv");
 
@@ -93,38 +92,64 @@ app.post("/send_mail", async (req, res) => {
           accessToken: accessToken,
         },
       });
-      const mailOptions = {
+      const kitchenOptions = {
         from: "Edugiehomes",
 
         to: formData.email,
         subject: `${formData.fullName} just placed an Order`,
         text: "hello from gmail using api",
-        html: `<h1>${formData.fullName} placed an order</h1>
-        ${formData.fullName} with the phone number ${
+        html: `<h2>${formData.fullName} just placed an order</h2>
+       <h3>${formData.fullName} with the phone number ${
           formData.phone
-        } placed an order
+        } placed an order on the edugie kitchen website </h3> 
           
-             Customer is Located in suit ${formData.suite}
-             this customer can be reached with the email ${formData.email}
+         <p> You can reach this  Customer in suite ${formData.suite}</p>
+
+         <p>Customer can be contacted via the email ${
+           formData.email
+         } or phone Number ${formData.phone}</p> 
           
-                            ${formData.fullName} ordered
+          <h4>order Details </h4> 
           
              ${cartItems.map(
                (item: any) =>
-                 item.qty +
-                 " " +
-                 item.title +
-                 " at ₦" +
-                 item.price +
-                 " each...."
+                 `<p> ${
+                   item.qty + " " + item.title + " at ₦" + item.price + " each."
+                 }</p>`
              )}
-             The total cost for this order is ₦${totalAmount}
-          
-             Waiting for the confirmation Call, ${formData.fullName}`,
+            <p> The total cost for this order is <strong>₦${totalAmount}</strong>  </p>
+            <p>kindly reach out to ${
+              formData.fullName
+            } via phone call or email to confirm this order
+            <h2>Copyright © Edugie kitchen </h2>`,
       };
 
-      const result = await transporter.sendMail(mailOptions);
-      return result;
+      const userOptions = {
+        from: "Edugiehomes",
+
+        to: formData.email,
+        subject: `Edugie Kitchen | Taste Ripper`,
+        text: "hello from gmail using api",
+        html: `<h2>Kindly wait for a confirmation call from an edugie staff</h2>
+    
+        <h3>Order Details</h3>
+          
+        ${cartItems.map(
+          (item: any) =>
+            `<p> ${
+              item.qty + " " + item.title + " at ₦" + item.price + " each"
+            }</p>`
+        )}
+       <p> The total cost of your order is <strong>₦${totalAmount}</strong>  </p>
+       <p> You are located at  <strong>suite ${formData.suite}</strong>  </p>
+       <p> Kindly reach out to us if any of these details is incorrect </p>
+       <p>Pls wait for a confirmation call from an edugie kitchen staff to finalise your order </p>
+       <h2>Copyright © Edugie kitchen </h2>`,
+      };
+
+      const kitchen = await transporter.sendMail(kitchenOptions);
+      const user = await transporter.sendMail(userOptions);
+      return [kitchen, user];
     } catch (error) {
       return error;
     }
