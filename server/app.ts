@@ -63,6 +63,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const EMAIL = process.env.EMAIL;
 
 console.log(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN);
 
@@ -95,7 +96,7 @@ app.post("/send_mail", async (req, res) => {
       const kitchenOptions = {
         from: "Edugiehomes",
 
-        to: formData.email,
+        to: EMAIL,
         subject: `${formData.fullName} just placed an Order`,
         text: "hello from gmail using api",
         html: `<h2>${formData.fullName} just placed an order</h2>
@@ -125,7 +126,7 @@ app.post("/send_mail", async (req, res) => {
       };
 
       const userOptions = {
-        from: "Edugiehomes",
+        from: "EdugieKitchen",
 
         to: formData.email,
         subject: `Edugie Kitchen | Taste Ripper`,
