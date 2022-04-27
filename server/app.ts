@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
@@ -104,7 +104,7 @@ app.post("/send_mail", async (req, res) => {
           formData.phone
         } placed an order on the edugie kitchen website </h3> 
           
-         <p> You can reach this  Customer in suite ${formData.suite}</p>
+         <p> You can reach this  Customer at the ${formData.suite} suite</p>
 
          <p>Customer can be contacted via the email ${
            formData.email
@@ -142,9 +142,9 @@ app.post("/send_mail", async (req, res) => {
             }</p>`
         )}
        <p> The total cost of your order is <strong>₦${totalAmount}</strong>  </p>
-       <p> You are located at  <strong>suite ${formData.suite}</strong>  </p>
+       <p> You placed this order from <strong>suite ${formData.suite}</strong>  </p>
        <p> Kindly reach out to us if any of these details is incorrect </p>
-       <p>Pls wait for a confirmation call from an edugie kitchen staff to finalise your order </p>
+       <p> Please wait for a confirmation call from an edugie kitchen staff to finalise your order </p>
        <h2>Copyright © Edugie kitchen </h2>`,
       };
 
