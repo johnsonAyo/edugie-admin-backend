@@ -1,5 +1,4 @@
 import express from "express";
-// import imageMulter from "./../utils/multerImageUpload";
 import {
   deleteMeal,
   updateMeal,
@@ -10,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// router.route("/").get(getAllMeal).post(imageMulter.single("productThumbnail"), createMeal);
 router.route("/").get(getAllMeal).post(createMeal);
 router.route("/:id").get(getMeal).delete(deleteMeal).patch(updateMeal);
 
